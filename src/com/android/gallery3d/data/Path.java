@@ -117,7 +117,7 @@ public class Path {
         return path.equalsIgnoreCase(p);
     }
 
-    //？？？？？？？？？？？？
+    //将String类型转换为Path类型
     public static Path fromString(String s) {
         synchronized (Path.class) {
             String[] segments = split(s);

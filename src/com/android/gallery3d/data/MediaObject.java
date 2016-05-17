@@ -133,6 +133,7 @@ public abstract class MediaObject {
         return MEDIA_TYPE_UNKNOWN;
     }
 
+    //获取media细节
     public MediaDetails getDetails() {
         MediaDetails details = new MediaDetails();
         return details;

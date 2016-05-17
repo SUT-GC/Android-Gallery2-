@@ -27,11 +27,15 @@ import com.android.gallery3d.util.ThreadPool.Job;
 public abstract class MediaItem extends MediaObject {
     // NOTE: These type numbers are stored in the image cache, so it should not
     // not be changed without resetting the cache.
+    //缩略图
     public static final int TYPE_THUMBNAIL = 1;
+    //极小的
     public static final int TYPE_MICROTHUMBNAIL = 2;
 
+    //图片质量
     public static final int CACHED_IMAGE_QUALITY = 95;
 
+    //图片准本，等待，错误
     public static final int IMAGE_READY = 0;
     public static final int IMAGE_WAIT = 1;
     public static final int IMAGE_ERROR = -1;
@@ -39,7 +43,9 @@ public abstract class MediaItem extends MediaObject {
     public static final String MIME_TYPE_JPEG = "image/jpeg";
     public static final String MIME_TYPE_GIF = "image/gif";
 
+    //类型缓冲池大小
     private static final int BYTESBUFFE_POOL_SIZE = 4;
+    //类型缓冲大小
     private static final int BYTESBUFFER_SIZE = 200 * 1024;
 
     private static int sMicrothumbnailTargetSize = 200;
@@ -49,6 +55,7 @@ public abstract class MediaItem extends MediaObject {
     private static int sThumbnailTargetSize = 640;
 
     // TODO: fix default value for latlng and change this.
+    //无效参数
     public static final double INVALID_LATLNG = 0f;
 
     public abstract Job<Bitmap> requestImage(int type);
@@ -81,6 +88,7 @@ public abstract class MediaItem extends MediaObject {
 
     // The rotation of the full-resolution image. By default, it returns the value of
     // getRotation().
+    // 全分辨率的图片旋转，美浓人情况下爱返回getRotation()
     public int getFullImageRotation() {
         return getRotation();
     }
@@ -110,6 +118,7 @@ public abstract class MediaItem extends MediaObject {
         return null;
     }
 
+    //返回目标的大小
     public static int getTargetSize(int type) {
         switch (type) {
             case TYPE_THUMBNAIL:
@@ -122,6 +131,7 @@ public abstract class MediaItem extends MediaObject {
         }
     }
 
+    //返回BytesBufferPool
     public static BytesBufferPool getBytesBufferPool() {
         return sMicroThumbBufferPool;
     }

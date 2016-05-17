@@ -64,9 +64,11 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     private static final int ONRESUME_DELAY = 50;
 
     private AlertDialog mAlertDialog = null;
+    //定义 安装BroadcaseReceiver
     private BroadcastReceiver mMountReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            //获得系统文件的绝对路径（能放置缓存文件的地方）
             if (getExternalCacheDir() != null) onStorageReady();
         }
     };
@@ -75,11 +77,14 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //排列方向管理者
         mOrientationManager = new OrientationManager(this);
+        //切换滚动条
         toggleStatusBarByOrientation();
         getWindow().setBackgroundDrawable(null);
         mPanoramaViewHelper = new PanoramaViewHelper(this);
         mPanoramaViewHelper.onCreate();
+        //绑定批service
         doBindBatchService();
     }
 
@@ -154,10 +159,13 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         mGLRootView = (GLRootView) findViewById(R.id.gl_root_view);
     }
 
+    //储存装置准备
     protected void onStorageReady() {
         if (mAlertDialog != null) {
+            //驳回对话框，并且在屏幕上消失
             mAlertDialog.dismiss();
             mAlertDialog = null;
+            //注销MounReceiver
             unregisterReceiver(mMountReceiver);
         }
     }
@@ -310,11 +318,13 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         }
     }
 
+    //不显示切换状态条
     protected void disableToggleStatusBar() {
         mDisableToggleStatusBar = true;
     }
 
     // Shows status bar in portrait view, hide in landscape view
+    //显示状态条在肖像view，隐藏风景view
     private void toggleStatusBarByOrientation() {
         if (mDisableToggleStatusBar) return;
 
@@ -326,24 +336,31 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         }
     }
 
+    //get方法
     public TransitionStore getTransitionStore() {
         return mTransitionStore;
     }
 
+    //get方法
     public PanoramaViewHelper getPanoramaViewHelper() {
         return mPanoramaViewHelper;
     }
 
     protected boolean isFullscreen() {
+        //是否时全屏
         return (getWindow().getAttributes().flags
                 & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
     }
 
     private BatchService mBatchService;
+    //创建状态码为false
     private boolean mBatchServiceIsBound = false;
+    //定义绑定监听函数
     private ServiceConnection mBatchServiceConnection = new ServiceConnection() {
         @Override
+        //传参进去，组件名字，交换的数据
         public void onServiceConnected(ComponentName className, IBinder service) {
+            //获得当前进行的批service
             mBatchService = ((BatchService.LocalBinder)service).getService();
         }
 
@@ -354,13 +371,16 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     };
 
     private void doBindBatchService() {
+        //绑定Service并且指定连接监听者mBatchServiceConnection，自动创建
         bindService(new Intent(this, BatchService.class), mBatchServiceConnection, Context.BIND_AUTO_CREATE);
+        //绑定Service的状态码
         mBatchServiceIsBound = true;
     }
 
     private void doUnbindBatchService() {
         if (mBatchServiceIsBound) {
             // Detach our existing connection.
+            //接触绑定
             unbindService(mBatchServiceConnection);
             mBatchServiceIsBound = false;
         }

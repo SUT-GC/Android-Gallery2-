@@ -25,26 +25,37 @@ import com.android.gallery3d.glrenderer.GLCanvas;
 public interface GLRoot {
 
     // Listener will be called when GL is idle AND before each frame.
-    // Mainly used for uploading textures.
+    // Mainly used for uploading textures(文理）.
     public static interface OnGLIdleListener {
         public boolean onGLIdle(
                 GLCanvas canvas, boolean renderRequested);
     }
 
+    //添加事件监听器
     public void addOnGLIdleListener(OnGLIdleListener listener);
+    //注册开始的动画
     public void registerLaunchedAnimation(CanvasAnimation animation);
+    //请求生成焦点
     public void requestRenderForced();
+    //请求生成
     public void requestRender();
+    //请求布局面板
     public void requestLayoutContentPane();
 
+    //对渲染线程进行lock操作
     public void lockRenderThread();
     public void unlockRenderThread();
 
+    //设置内容面板
     public void setContentPane(GLView content);
+    //设置取向源
     public void setOrientationSource(OrientationSource source);
+    //设置显示旋转
     public int getDisplayRotation();
+    //修正
     public int getCompensation();
     public Matrix getCompensationMatrix();
+    //冻结
     public void freeze();
     public void unfreeze();
     public void setLightsOutMode(boolean enabled);

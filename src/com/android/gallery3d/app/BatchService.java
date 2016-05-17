@@ -23,8 +23,10 @@ import android.os.IBinder;
 
 import com.android.gallery3d.util.ThreadPool;
 
+//继承service
 public class BatchService extends Service {
 
+    //localBinder集成Binder
     public class LocalBinder extends Binder {
         BatchService getService() {
             return BatchService.this;

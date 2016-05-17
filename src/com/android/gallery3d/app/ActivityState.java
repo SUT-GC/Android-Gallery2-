@@ -40,11 +40,17 @@ import com.android.gallery3d.ui.PreparePageFadeoutTexture;
 import com.android.gallery3d.util.GalleryUtils;
 
 abstract public class ActivityState {
+    //隐藏ActionBar
     protected static final int FLAG_HIDE_ACTION_BAR = 1;
+    //隐藏StatusBar
     protected static final int FLAG_HIDE_STATUS_BAR = 2;
+    //当插入时，屏幕在上
     protected static final int FLAG_SCREEN_ON_WHEN_PLUGGED = 4;
+    //屏幕总是在上
     protected static final int FLAG_SCREEN_ON_ALWAYS = 8;
+    //总是lock，直到屏幕在上
     protected static final int FLAG_ALLOW_LOCK_WHILE_SCREEN_ON = 16;
+    //当locked，显示
     protected static final int FLAG_SHOW_WHEN_LOCKED = 32;
 
     protected AbstractGalleryActivity mActivity;
@@ -56,14 +62,19 @@ abstract public class ActivityState {
 
     protected static class ResultEntry {
         public int requestCode;
+        //resultCode = 操作取消
         public int resultCode = Activity.RESULT_CANCELED;
         public Intent resultData;
     }
 
+    //销毁
     private boolean mDestroyed = false;
+    //插入
     private boolean mPlugged = false;
+    //是否完成
     boolean mIsFinishing = false;
 
+    //过度
     private static final String KEY_TRANSITION_IN = "transition-in";
 
     private StateTransitionAnimation.Transition mNextTransition =
@@ -199,6 +210,7 @@ abstract public class ActivityState {
         AbstractGalleryActivity activity = mActivity;
         ActionBar actionBar = activity.getActionBar();
         if (actionBar != null) {
+            //判断是不是隐藏actionBar
             if ((mFlags & FLAG_HIDE_ACTION_BAR) != 0) {
                 actionBar.hide();
             } else {

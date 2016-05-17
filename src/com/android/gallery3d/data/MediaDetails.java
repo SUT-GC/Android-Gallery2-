@@ -50,6 +50,7 @@ public class MediaDetails implements Iterable<Entry<Integer, Object>> {
     public static final int INDEX_SIZE = 10;
 
     // for EXIF
+    //拍照信息
     public static final int INDEX_MAKE = 100;
     public static final int INDEX_MODEL = 101;
     public static final int INDEX_FLASH = 102;

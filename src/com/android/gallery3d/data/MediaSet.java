@@ -72,12 +72,13 @@ public abstract class MediaSet extends MediaObject {
     //返回这个media的Item 在【start， start+count】这个范围里
     // The number of media items returned may be less than the specified count
     // if there are not enough media items available. The number of
-    // media items available may not be consistent with the return value of
+    // media items available may not be consistent with（一致） the return value of
     // getMediaItemCount() because the contents of database may have already
     // changed.
     public ArrayList<MediaItem> getMediaItem(int start, int count) {
         return new ArrayList<MediaItem>();
     }
+
 
     public MediaItem getCoverMediaItem() {
         ArrayList<MediaItem> items = getMediaItem(0, 1);
