@@ -67,11 +67,15 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     //定义 安装BroadcaseReceiver
     private BroadcastReceiver mMountReceiver = new BroadcastReceiver() {
         @Override
+        //当接收到相对应的广播时候调用
         public void onReceive(Context context, Intent intent) {
             //获得系统文件的绝对路径（能放置缓存文件的地方）
-            if (getExternalCacheDir() != null) onStorageReady();
+            if (getExternalCacheDir() != null)
+                //准备存储设备
+                onStorageReady();
         }
     };
+    //定义过滤器，当媒体安装的时候调用
     private IntentFilter mMountFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
 
     @Override
@@ -79,20 +83,22 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         super.onCreate(savedInstanceState);
         //排列方向管理者
         mOrientationManager = new OrientationManager(this);
-        //切换滚动条
-        toggleStatusBarByOrientation();
-        getWindow().setBackgroundDrawable(null);
         mPanoramaViewHelper = new PanoramaViewHelper(this);
         mPanoramaViewHelper.onCreate();
+        getWindow().setBackgroundDrawable(null);
+        //切换状态条
+        toggleStatusBarByOrientation();
         //绑定批service
         doBindBatchService();
     }
 
     @Override
+    //存储一些状态来进行恢复
     protected void onSaveInstanceState(Bundle outState) {
         mGLRootView.lockRenderThread();
         try {
             super.onSaveInstanceState(outState);
+            //调用StateManager来saveState
             getStateManager().saveState(outState);
         } finally {
             mGLRootView.unlockRenderThread();
@@ -100,35 +106,44 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     }
 
     @Override
+    //当前Acitity配置改变时，调用StateManager与GalleryActionBar的onConfigurationChange
     public void onConfigurationChanged(Configuration config) {
         super.onConfigurationChanged(config);
         mStateManager.onConfigurationChange(config);
         getGalleryActionBar().onConfigurationChanged();
+        //重新进行状态配置
+        //生命菜单项已经改变，这个函数执行玩会调用onCreateOptionsMenu
         invalidateOptionsMenu();
+        //重新创建状态条
         toggleStatusBarByOrientation();
     }
 
     @Override
+    //创建按钮
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         return getStateManager().createOptionsMenu(menu);
     }
 
     @Override
+    //返回AndroidContext
     public Context getAndroidContext() {
         return this;
     }
 
     @Override
+    //get dateManager
     public DataManager getDataManager() {
         return ((GalleryApp) getApplication()).getDataManager();
     }
 
     @Override
+    //get ThreadPool
     public ThreadPool getThreadPool() {
         return ((GalleryApp) getApplication()).getThreadPool();
     }
 
+    //get StateManager
     public synchronized StateManager getStateManager() {
         if (mStateManager == null) {
             mStateManager = new StateManager(this);
@@ -136,6 +151,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         return mStateManager;
     }
 
+    //get GLRoot
     public GLRoot getGLRoot() {
         return mGLRootView;
     }
@@ -149,11 +165,13 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         }
     }
 
+    //get OrientationManager
     public OrientationManager getOrientationManager() {
         return mOrientationManager;
     }
 
     @Override
+    //进行view文件的设置
     public void setContentView(int resId) {
         super.setContentView(resId);
         mGLRootView = (GLRootView) findViewById(R.id.gl_root_view);
@@ -173,10 +191,15 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     @Override
     protected void onStart() {
         super.onStart();
+        /*
+         * 当没有外部存储设备的时候
+         *  弹出dialog并且当选择确认的时候关闭当前acitivity
+         */
         if (getExternalCacheDir() == null) {
             OnCancelListener onCancel = new OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
+                    //关掉当前的acitivity
                     finish();
                 }
             };
@@ -191,18 +214,23 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
                     .setMessage(R.string.no_external_storage)
                     .setNegativeButton(android.R.string.cancel, onClick)
                     .setOnCancelListener(onCancel);
+            //如果SDK_INT版本 > 11
             if (ApiHelper.HAS_SET_ICON_ATTRIBUTE) {
                 setAlertDialogIconAttribute(builder);
             } else {
+                //设置图标
                 builder.setIcon(android.R.drawable.ic_dialog_alert);
             }
+            //创建Alertdialog并且show
             mAlertDialog = builder.show();
+            //注册安装监听器
             registerReceiver(mMountReceiver, mMountFilter);
         }
         mPanoramaViewHelper.onStart();
     }
 
     @TargetApi(ApiHelper.VERSION_CODES.HONEYCOMB)
+    //当API>11时候设置alert图标
     private static void setAlertDialogIconAttribute(
             AlertDialog.Builder builder) {
         builder.setIconAttribute(android.R.attr.alertDialogIcon);
@@ -212,6 +240,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     protected void onStop() {
         super.onStop();
         if (mAlertDialog != null) {
+            //取消监听
             unregisterReceiver(mMountReceiver);
             mAlertDialog.dismiss();
             mAlertDialog = null;
@@ -222,14 +251,18 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     @Override
     protected void onResume() {
         super.onResume();
+        //延迟onresume
         delayedOnResume(ONRESUME_DELAY);
     }
 
+    //每次resume的时候都延迟50ms
     private void delayedOnResume(final int delay){
         final Handler handler = new Handler();
+            //延迟任务，将一些费时的东西resume
            Runnable delayTask = new Runnable() {
               @Override
               public void run() {
+                  //50ms之后执行Runnbale
                    handler.postDelayed(new Runnable() {
                        @Override
                        public void run() {
@@ -240,9 +273,10 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
                             } finally {
                                 mGLRootView.unlockRenderThread();
                             }
-                    mGLRootView.onResume();
-                    mOrientationManager.resume();
-                   }}, delay);
+                            mGLRootView.onResume();
+                            mOrientationManager.resume();
+                       }
+                   }, delay);
              }
           };
         Thread delayThread = new Thread(delayTask);
@@ -266,6 +300,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     }
 
     @Override
+    //注销，解绑
     protected void onDestroy() {
         super.onDestroy();
         mGLRootView.lockRenderThread();
@@ -278,6 +313,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     }
 
     @Override
+    //呆结果的返回activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mGLRootView.lockRenderThread();
         try {
@@ -289,6 +325,8 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     }
 
     @Override
+    //冲定义返回按键
+    //返回上一个状态
     public void onBackPressed() {
         // send the back event to the top sub-state
         GLRoot root = getGLRoot();
@@ -300,6 +338,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         }
     }
 
+    //get GalleryActionBar
     public GalleryActionBar getGalleryActionBar() {
         if (mActionBar == null) {
             mActionBar = new GalleryActionBar(this);
@@ -324,14 +363,19 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     }
 
     // Shows status bar in portrait view, hide in landscape view
-    //显示状态条在肖像view，隐藏风景view
+    // 如果是没有状态栏就不用管了，如果有状态栏，横屏显示隐藏状态栏，竖屏显示状态栏
     private void toggleStatusBarByOrientation() {
         if (mDisableToggleStatusBar) return;
 
         Window win = getWindow();
+        //方向不变，值对应端口的资源定定位符
+        //portrait 竖排
+        //landscape 横排
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            //清楚全屏
             win.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         } else {
+            //开始全屏
             win.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
     }
@@ -370,6 +414,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         }
     };
 
+    //绑定service
     private void doBindBatchService() {
         //绑定Service并且指定连接监听者mBatchServiceConnection，自动创建
         bindService(new Intent(this, BatchService.class), mBatchServiceConnection, Context.BIND_AUTO_CREATE);
@@ -377,6 +422,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         mBatchServiceIsBound = true;
     }
 
+    //解绑service
     private void doUnbindBatchService() {
         if (mBatchServiceIsBound) {
             // Detach our existing connection.
@@ -395,6 +441,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     }
 
     public void printSelectedImage(Uri uri) {
+        //根据uri打印选择的图片
         if (uri == null) {
             return;
         }

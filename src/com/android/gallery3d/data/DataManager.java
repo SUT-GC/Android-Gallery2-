@@ -49,6 +49,7 @@ import java.util.WeakHashMap;
 // path. And it's used to identify a specific media set even if the process is
 // killed and re-created, so child keys should be stable identifiers.
 
+//实现拼接改变监听器
 public class DataManager implements StitchingChangeListener {
     public static final int INCLUDE_IMAGE = 1;
     public static final int INCLUDE_VIDEO = 2;
@@ -65,6 +66,7 @@ public class DataManager implements StitchingChangeListener {
     // to prevent concurrency issue.
     public static final Object LOCK = new Object();
 
+    //根据传入的AbstractGalleryActivity返回DateManager
     public static DataManager from(Context context) {
         GalleryApp app = (GalleryApp) context.getApplicationContext();
         return app.getDataManager();
@@ -92,6 +94,9 @@ public class DataManager implements StitchingChangeListener {
     private static class DateTakenComparator implements Comparator<MediaItem> {
         @Override
         public int compare(MediaItem item1, MediaItem item2) {
+            //a<b -1
+            //a=b 0
+            //a>b 1
             return -Utils.compare(item1.getDateInMs(), item2.getDateInMs());
         }
     }
@@ -101,6 +106,7 @@ public class DataManager implements StitchingChangeListener {
     private GalleryApp mApplication;
     private int mActiveCount = 0;
 
+    //通知
     private HashMap<Uri, NotifyBroker> mNotifierMap =
             new HashMap<Uri, NotifyBroker>();
 
@@ -113,6 +119,7 @@ public class DataManager implements StitchingChangeListener {
         mDefaultMainHandler = new Handler(application.getMainLooper());
     }
 
+    //全部挂在链表上
     public synchronized void initializeSourceMap() {
         if (!mSourceMap.isEmpty()) return;
 

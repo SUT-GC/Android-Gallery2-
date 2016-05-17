@@ -39,6 +39,7 @@ import com.android.gallery3d.ui.GLView;
 import com.android.gallery3d.ui.PreparePageFadeoutTexture;
 import com.android.gallery3d.util.GalleryUtils;
 
+//定义抽象类，为ActivityState，用来代表Acitivity的状态
 abstract public class ActivityState {
     //隐藏ActionBar
     protected static final int FLAG_HIDE_ACTION_BAR = 1;
@@ -53,13 +54,22 @@ abstract public class ActivityState {
     //当locked，显示
     protected static final int FLAG_SHOW_WHEN_LOCKED = 32;
 
+    //定义acitivity
     protected AbstractGalleryActivity mActivity;
+    //定义数据bundle
     protected Bundle mData;
+    //定义标志mFlags
     protected int mFlags;
 
+    //定义返回值实体 mReceivedResults（收到的Result）
     protected ResultEntry mReceivedResults;
+    //定义返回值实体 mResult
     protected ResultEntry mResult;
 
+    //定义返回值实体
+    //请求码
+    //返回码
+    //返回数据
     protected static class ResultEntry {
         public int requestCode;
         //resultCode = 操作取消
@@ -79,6 +89,7 @@ abstract public class ActivityState {
 
     private StateTransitionAnimation.Transition mNextTransition =
             StateTransitionAnimation.Transition.None;
+    //定义开场动画
     private StateTransitionAnimation mIntroAnimation;
     private GLView mContentPane;
 

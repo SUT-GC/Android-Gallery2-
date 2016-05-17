@@ -33,6 +33,7 @@ import java.util.Stack;
 public class StateManager {
     @SuppressWarnings("unused")
     private static final String TAG = "StateManager";
+    //默认isresumed为false
     private boolean mIsResumed = false;
 
     private static final String KEY_MAIN = "activity-state";
@@ -41,24 +42,33 @@ public class StateManager {
     private static final String KEY_CLASS = "class";
 
     private AbstractGalleryActivity mActivity;
+    //创建一个堆栈，里面内容是StateEntry -> 里面一个bundel，一个AcitivityState
     private Stack<StateEntry> mStack = new Stack<StateEntry>();
+    //设置一个ResultEntry
     private ActivityState.ResultEntry mResult;
 
+    //构造参数里传入一个activity
     public StateManager(AbstractGalleryActivity activity) {
         mActivity = activity;
     }
 
+    //启动某个state
     public void startState(Class<? extends ActivityState> klass,
             Bundle data) {
         Log.v(TAG, "startState " + klass);
         ActivityState state = null;
         try {
+            //根据传入的ActivityState的子类进行反射 => state
             state = klass.newInstance();
         } catch (Exception e) {
             throw new AssertionError(e);
         }
+        //如果stack不为空
         if (!mStack.isEmpty()) {
+            //得到栈顶的ActivityState，=> top
             ActivityState top = getTopState();
+
+            //过渡到下一个暂停
             top.transitionOnNextPause(top.getClass(), klass,
                     StateTransitionAnimation.Transition.Incoming);
             if (mIsResumed) top.onPause();
@@ -176,6 +186,14 @@ public class StateManager {
     void finishState(ActivityState state, boolean fireOnPause) {
         // The finish() request could be rejected (only happens under Monkey),
         // If it is rejected, we won't close the last page.
+        /*
+         * 如果栈的值 = 1
+         *  如果是result请求进来的，就返回请求码
+         *  finish当前state
+         *  如果finish失败，打印失败log
+         *  打印finish完毕log
+         *
+         */
         if (mStack.size() == 1) {
             Activity activity = (Activity) mActivity.getAndroidContext();
             if (mResult != null) {
@@ -190,6 +208,10 @@ public class StateManager {
         }
 
         Log.v(TAG, "finishState " + state);
+        //如果当前state不是栈顶的activity
+        //  如果当前state已经注销
+        //      打印已经注销
+        //  否则打印错误
         if (state != mStack.peek().activityState) {
             if (state.isDestroyed()) {
                 Log.d(TAG, "The state is already destroyed");
@@ -202,11 +224,15 @@ public class StateManager {
         }
 
         // Remove the top state.
+        //弹出栈顶页面
         mStack.pop();
+        //将当前的state已经finishing = true
         state.mIsFinishing = true;
+        //如果栈不为空，则取栈顶元素
         ActivityState top = !mStack.isEmpty() ? mStack.peek().activityState : null;
         if (mIsResumed && fireOnPause) {
             if (top != null) {
+                //state与栈顶的切换，添加动画
                 state.transitionOnNextPause(state.getClass(), top.getClass(),
                         StateTransitionAnimation.Transition.Outgoing);
             }
